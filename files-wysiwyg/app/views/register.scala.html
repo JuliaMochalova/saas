@@ -1,0 +1,19 @@
+@import bootstrap._
+
+@(form: Form[Register])
+    @main("Регистрация") {
+        @if(form.hasGlobalErrors) {
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert">x</a>
+                @form.globalError.message
+            </div>
+        }
+
+        @helper.form(routes.Auth.register()) {
+            @input(form("email"), "Email", 'type -> "email")
+            @input(form("password"), "Пароль", 'type -> "password")
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            </div>
+        }
+    }

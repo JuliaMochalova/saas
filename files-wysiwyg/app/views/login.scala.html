@@ -1,0 +1,24 @@
+@import bootstrap._
+
+@(loginForm: Form[Login])
+    @main("Вход") {
+        @if(loginForm.hasGlobalErrors) {
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert">x</a>
+                @loginForm.globalError.message
+            </div>
+        }
+
+        @helper.form(routes.Auth.auth()) {
+            <h2 class="form-signin-heading">Вход</h2>
+            @*<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>*@
+            @input(loginForm("email"), "Email", 'type -> "text")
+            @input(loginForm("password"), "Пароль", 'type -> "password")
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Войти</button> или
+                <a href="@routes.Auth.signup()" class="btn btn-default">Зарегистрироваться</a>
+
+            </div>
+        }
+    }
