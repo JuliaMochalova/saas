@@ -17,10 +17,11 @@
 
 S3 предоставляет RESTful API для взаимодействия с сервисом.  Есть Java библиотека, которая оборачивает это API, упрощая взаимодействие с ним из Java кода. В Play 2 проекте вы можете добавить зависимость от `aws-java-sdk`, изменив раздел `appDependencies` в [project/Build.scala](https://github.com/heroku/devcenter-java-play-s3/blob/master/project/Build.scala#L10):
 
-    :::scala
+    ```scala
     val appDependencies = Seq(
       "com.amazonaws" % "aws-java-sdk" % "1.3.11"
     )
+	```
 
 После обновления зависимостей в проекте Play 2 вам потребуется перезапустить Play 2 и перегенерировать конфигурационные файлы для Вашей IDE (Eclipse & IntelliJ).
 
@@ -30,7 +31,7 @@ S3 плагин для Play 2
 
 В Play 2 есть способ создания плагинов, которые могут быть автоматически запущены при запуске сервера.  Еще пока нет официального  S3 плагина для Play 2, но вы можете создать свой собственный создав файл [app/plugins/S3Plugin.java](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/plugins/S3Plugin.java) со следующим содержимым:
 
-    :::java
+    ```java
     package plugins;
     
     import com.amazonaws.auth.AWSCredentials;
@@ -78,6 +79,7 @@ S3 плагин для Play 2
         }
         
     }
+```	
 
 `S3Plugin` считывает три параметра конфигурации, устанавливает соединение с S3 и создает S3 Bucket для хранения файлов.  Чтобы включить плагин создайте новый файл с именем [conf/play.plugins](https://github.com/heroku/devcenter-java-play-s3/blob/master/conf/play.plugins) который содержит:
 
@@ -97,10 +99,10 @@ S3 плагин для Play 2
 
 [Не рекомендуется](http://www.12factor.net/config) помещать важную секретную информацию прямо в конфигурационные файлы. Вместо этого `aws.access.key` и `aws.secret.key` берутся из переменных среды окружения с именами `AWS_ACCESS_KEY` и `AWS_SECRET_KEY`.  Вы можете установить эти значения локально, проэкспортировав их следующим образом:
 
-    :::term
+```bash
     $ export AWS_ACCESS_KEY=<Your AWS Access Key>
     $ export AWS_SECRET_KEY=<Your AWS Secret Key>
-
+```
 Имя `aws.s3.bucket` должно быть изменено на что-нибудь уникальное и связанное с вашим приложением. Например, демо-приложение использует значение  `com.heroku.devcenter-java-play-s3` которое нужно бы изменить на что-то другое, если вы хотите запускать его самостоятельно.
 
 
@@ -109,7 +111,7 @@ S3File модель
 
 Простой [Объект модели `S3File`](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/models/S3File.java) будет загружать файлы в S3 и сохранять метаданные о файлах в базу данных:
 
-    :::java
+```java
     package models;
     
     import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -190,7 +192,7 @@ S3File модель
 
 Реальное имя файла на извлекается с помощью метода `getActualFileName` , что представляет собой `id` и оригинальное имя файла, соединенное через`/`.  S3 не имеет понятия директории, но данный способ симлирует их и позволяет избежать коллизии в именах файлов.
 
-Класс `S3File` также имеет метод `getUrl` который возвращает URL до файла используя веб-сервис S3.  Это самый прямой путь для пользователя получить фаайл от S3 , но он работает только потому, что файл настроен для публичного доступа.
+Класс `S3File` также имеет метод `getUrl` который возвращает URL до файла используя веб-сервис S3.  Это самый прямой путь для пользователя получить фаайл от S3, но он работает только потому, что файл настроен для публичного доступа.
 
 <div class="note" markdown="1">
 В качестве альтернативы вы могли бы не делать файлы публичными и создать другой метод  `S3File` который бы использовал вызов S3 API для получения файла.
@@ -206,13 +208,13 @@ S3File модель
 
 Эти значения используются для локальной разработки, но для запуска на Heroku вы можете использовать [Heroku Postgres Add-on](https://devcenter.heroku.com/articles/heroku-postgres-starter-tier) который автоматически предоставляется для приложений Play.  Чтобы добавить PostgreSQL JDBC драйвер в ваш проект, добавьте следующую зависимость в ваш файл [project/Build.scala](https://github.com/heroku/devcenter-java-play-s3/blob/master/project/Build.scala#L12):
 
-    :::scala
+```scala
     "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
-
+```
 Чтобы сказать Play фреймворку использовать базу данных PostgreSQL создайте файл с именем `Procfile` содержащий:
-
+```
     web: target/start -Dhttp.port=$PORT -DapplyEvolutions.default=true -Ddb.default.driver=org.postgresql.Driver -Ddb.default.url=$DATABASE_URL
-
+```
 Это перекроет настройки конфигурации базы данных (чтобы использоваться PostgreSQL (to use PostgreSQL) когда приложение запущено на Heroku.
 
 
@@ -221,7 +223,7 @@ S3File модель
 
 Теперь, когда у вас есть модель, которая хранит метаданные о файле и подгружает файл в S3, давайте создадим контроллер, который будет управлять рендерингом веб-страницы с уже загруженными файлами и обрабатывать непосредственно загрузку файлов.  Создайте (или измените) файл с именем [app/controllers/Application.java](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/controllers/Application.java), содержащий:
 
-    :::java
+```java
     package controllers;
     
     import models.S3File;
@@ -258,6 +260,7 @@ S3File модель
         }
     
     }
+```
 
 Метод `index` класса `Application` производит выборку объектов `S3File` из базы данных и затем передает их в `index` шаблон для рендеринга.  Метод `upload` принимает загруженный файл, создает новый `S3File` для него, сохраняет его, затем перенаправляет обратно на главную страницу.
 
@@ -266,7 +269,7 @@ Index шаблон
 ----------
 
 Теперь давайте содадим простую главну страницу, которая будет содержать форму, позволяющую пользователю загрузить файл, а также список загруженных файлов.   Создайте, или обновите файл с именем [app/views/index.scala.html](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/views/index.scala.html) содержащий:
-
+```
     @(uploads: List[Upload])
     <!DOCTYPE html>
     
@@ -291,7 +294,7 @@ Index шаблон
     
     </body>
     </html>
-
+```
 Этот шаблон содержит форму загрузки файла (создается с использованием метода `helper.form`) и списка файлов.
 
 
@@ -299,41 +302,41 @@ Index шаблон
 ------
 
 Последняя вещь, которая нуждается в настройке - это маршруты.  Файл [conf/routes](https://github.com/heroku/devcenter-java-play-s3/blob/master/conf/routes) содержит отображение HTTP запросов в методы контроллера.  чтобы задать для GET запросов метод `Application.index`, адля  POST запросов - метод `Application.upload` добавьте [следующее](https://github.com/heroku/devcenter-java-play-s3/blob/master/conf/routes#L5) в ваш файл `conf/routes`:
-
+```
     GET     /                           controllers.Application.index()
     POST    /                           controllers.Application.upload()
-
+```
 
 Запуск в облаке Heroku
 -------------
 
 Если вы не склонировали исходники из проекта с примером [git репозиторий](https://github.com/heroku/devcenter-java-play-s3.git), тогда вам потребуется добавить свои файлы в новый репозиторий Git и закоммитить их:
 
-    :::term
+```bash
     git init
     git add .
     git commit -m init
-
+```
 Теперь вы можете разместить приложение в облаке Heroku:
 
-    :::term
+```bash
     heroku create
-
+```
 Установите ваши ключи для соединения с AWS:
 
-    :::term
+```bash
     heroku config:add AWS_ACCESS_KEY=<Your AWS Access Key> AWS_SECRET_KEY=<Your AWS Secret Key>
-
+```
 Чтобы развернуть приложение в облаке Heroku, сделайте push вашего репозитория Git в Heroku:
 
-    :::term
+```bash
     git push heroku master
-
+```
 Теперь проверьте, что риложение работает:
 
-    :::term
+```bash
     heroku open
-
+```
 
 Информация для дальнейшего изучения
 ----------------
@@ -342,4 +345,4 @@ Index шаблон
 
 Данный пример делает двушаговый аплоад так как файл идет сначала в Play, затем в S3.  Вы можете пропустить первый шаг и загружать файлы напрямую в  S3 [POSTя напрямую в S3](http://aws.amazon.com/articles/1434?_encoding=UTF8&jiveRedirect=1).
 
-И, наконец, так как аплоад (и весь ввод-вывод) является блокирующими операциями, вы, возможно захотите [увеличить размер пула тредов для сервера Play ](http://www.playframework.org/documentation/2.0.2/AkkaCore) чтобы обрабатывать большее число параллельных запросов, так как по-умолчанию предоставляется только 4.
+И, наконец, так как аплоад (и весь ввод-вывод) является блокирующими операциями, вы, возможно, захотите [увеличить размер пула тредов для сервера Play ](http://www.playframework.org/documentation/2.0.2/AkkaCore) чтобы обрабатывать большее число параллельных запросов, так как по-умолчанию предоставляется только 4.
