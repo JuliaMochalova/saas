@@ -17,11 +17,11 @@
 
 S3 предоставляет RESTful API для взаимодействия с сервисом.  Есть Java библиотека, которая оборачивает это API, упрощая взаимодействие с ним из Java кода. В Play 2 проекте вы можете добавить зависимость от `aws-java-sdk`, изменив раздел `appDependencies` в [project/Build.scala](https://github.com/heroku/devcenter-java-play-s3/blob/master/project/Build.scala#L10):
 
-    ```scala
+ ```scala
     val appDependencies = Seq(
       "com.amazonaws" % "aws-java-sdk" % "1.3.11"
     )
-	```
+```
 
 После обновления зависимостей в проекте Play 2 вам потребуется перезапустить Play 2 и перегенерировать конфигурационные файлы для Вашей IDE (Eclipse & IntelliJ).
 
@@ -29,7 +29,7 @@ S3 предоставляет RESTful API для взаимодействия с
 S3 плагин для Play 2
 --------------------
 
-В Play 2 есть способ создания плагинов, которые могут быть автоматически запущены при запуске сервера.  Еще пока нет официального  S3 плагина для Play 2, но вы можете создать свой собственный создав файл [app/plugins/S3Plugin.java](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/plugins/S3Plugin.java) со следующим содержимым:
+В Play 2 есть способ создания плагинов, которые могут быть автоматически запущены при запуске сервера.  Еще пока нет официального  S3 плагина для Play 2, но вы можете сделать свой собственный, создав файл [app/plugins/S3Plugin.java](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/plugins/S3Plugin.java) со следующим содержимым:
 
  ```java
     package plugins;
@@ -85,13 +85,13 @@ S3 плагин для Play 2
 
     1500:plugins.S3Plugin
 
-Это дает `S3Plugin` инструкцию стартовать с приоритетом `1500`, означая, что это он стартует после всех дефолтных Плагинов Play. 
+Это дает `S3Plugin` инструкцию стартовать с приоритетом `1500`, означая, что он запустится после всех дефолтных Плагинов Play. 
 
 
 Сконфигурируйте S3Plugin
 ----------------------
 
-`S3Plugin` нуждается в трех[конфигурационных парамтрах](https://devcenter.heroku.com/articles/s3#credentials) для корректной работы.  `aws.access.key` содержит AWS Access Key и `aws.secret.key` содержит AWS Secret Key.  Вам также необходимо специфицировать глобально уникальный bucket с помощью параметра `aws.s3.bucket`.  Чтобы установить эти параметры конфигурации вы можете добавить их в файл [conf/application.conf](https://github.com/heroku/devcenter-java-play-s3/blob/master/conf/application.conf#L58):
+`S3Plugin` нуждается в трех [конфигурационных парамтрах](https://devcenter.heroku.com/articles/s3#credentials) для корректной работы.  `aws.access.key` содержит AWS Access Key и `aws.secret.key` содержит AWS Secret Key.  Вам также необходимо специфицировать глобально уникальный bucket с помощью параметра `aws.s3.bucket`.  Чтобы установить эти параметры конфигурации вы можете добавить их в файл [conf/application.conf](https://github.com/heroku/devcenter-java-play-s3/blob/master/conf/application.conf#L58):
 
     aws.access.key=${?AWS_ACCESS_KEY}
     aws.secret.key=${?AWS_SECRET_KEY}
@@ -103,6 +103,13 @@ S3 плагин для Play 2
     $ export AWS_ACCESS_KEY=<Your AWS Access Key>
     $ export AWS_SECRET_KEY=<Your AWS Secret Key>
 ```
+или в Windows
+```bash
+    $ SET AWS_ACCESS_KEY=<Your AWS Access Key>
+    $ SET AWS_SECRET_KEY=<Your AWS Secret Key>
+```
+
+
 Имя `aws.s3.bucket` должно быть изменено на что-нибудь уникальное и связанное с вашим приложением. Например, демо-приложение использует значение  `com.heroku.devcenter-java-play-s3` которое нужно бы изменить на что-то другое, если вы хотите запускать его самостоятельно.
 
 
@@ -215,7 +222,7 @@ S3File модель
 
 Чтобы сказать Play фреймворку использовать базу данных PostgreSQL создайте файл с именем `Procfile` содержащий:
 ```
-    web: target/start -Dhttp.port=$PORT -DapplyEvolutions.default=true -Ddb.default.driver=org.postgresql.Driver -Ddb.default.url=$DATABASE_URL
+web: target/start -Dhttp.port=$PORT -DapplyEvolutions.default=true -Ddb.default.driver=org.postgresql.Driver -Ddb.default.url=$DATABASE_URL
 ```
 Это перекроет настройки конфигурации базы данных (чтобы использоваться PostgreSQL (to use PostgreSQL) когда приложение запущено на Heroku.
 
@@ -271,7 +278,7 @@ Index шаблон
 ----------
 
 Теперь давайте содадим простую главну страницу, которая будет содержать форму, позволяющую пользователю загрузить файл, а также список загруженных файлов.   Создайте, или обновите файл с именем [app/views/index.scala.html](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/views/index.scala.html) содержащий:
-```
+```scala
     @(uploads: List[Upload])
     <!DOCTYPE html>
     
@@ -315,32 +322,32 @@ Index шаблон
 Если вы не склонировали исходники из проекта с примером [git репозиторий](https://github.com/heroku/devcenter-java-play-s3.git), тогда вам потребуется добавить свои файлы в новый репозиторий Git и закоммитить их:
 
 ```bash
-    git init
-    git add .
-    git commit -m init
+    $ git init
+    $ git add .
+    $ git commit -m init
 ```
 Теперь вы можете разместить приложение в облаке Heroku:
 
 ```bash
-    heroku create
+    $ heroku create
 ```
 Установите ваши ключи для соединения с AWS:
 
 ```bash
-    heroku config:add AWS_ACCESS_KEY=<Your AWS Access Key> AWS_SECRET_KEY=<Your AWS Secret Key>
+    $ heroku config:add AWS_ACCESS_KEY=<Your AWS Access Key> AWS_SECRET_KEY=<Your AWS Secret Key>
 ```
 Чтобы развернуть приложение в облаке Heroku, сделайте push вашего репозитория Git в Heroku:
 
 ```bash
-    git push heroku master
+    $ git push heroku master
 ```
 Теперь проверьте, что риложение работает:
 
 ```bash
-    heroku open
+    $ heroku open
 ```
 
-## Информация для дальнейшего изучения и лучшения
+Информация для дальнейшего изучения и лучшения
 ----------------
 
 Это лишь очень простой пример, поэтому есть несколько моментов, которые могут быть улучшены для использования в production. В этом примере скачивание файлов обрабатывается Amazon S3.  Лучше настроить кэш загруженных файлов с помощью [Amazon CloudFront](http://aws.amazon.com/cloudfront/).
