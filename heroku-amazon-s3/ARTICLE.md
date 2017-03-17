@@ -31,7 +31,7 @@ S3 плагин для Play 2
 
 В Play 2 есть способ создания плагинов, которые могут быть автоматически запущены при запуске сервера.  Еще пока нет официального  S3 плагина для Play 2, но вы можете создать свой собственный создав файл [app/plugins/S3Plugin.java](https://github.com/heroku/devcenter-java-play-s3/blob/master/app/plugins/S3Plugin.java) со следующим содержимым:
 
-    ```java
+ ```java
     package plugins;
     
     import com.amazonaws.auth.AWSCredentials;
@@ -179,6 +179,7 @@ S3File модель
         }
     
     }
+```
 
 Класс `S3File` имеет четыре поля: `id` который является первичным ключом; `bucket`, в который будет сохранен файл; `name` - имя файла; и актуальный `file` который на самом деле не будет сохранен в базе данных поэтому он `Transient`.
 
@@ -211,6 +212,7 @@ S3File модель
 ```scala
     "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
 ```
+
 Чтобы сказать Play фреймворку использовать базу данных PostgreSQL создайте файл с именем `Procfile` содержащий:
 ```
     web: target/start -Dhttp.port=$PORT -DapplyEvolutions.default=true -Ddb.default.driver=org.postgresql.Driver -Ddb.default.url=$DATABASE_URL
@@ -338,7 +340,7 @@ Index шаблон
     heroku open
 ```
 
-Информация для дальнейшего изучения
+## Информация для дальнейшего изучения и лучшения
 ----------------
 
 Это лишь очень простой пример, поэтому есть несколько моментов, которые могут быть улучшены для использования в production. В этом примере скачивание файлов обрабатывается Amazon S3.  Лучше настроить кэш загруженных файлов с помощью [Amazon CloudFront](http://aws.amazon.com/cloudfront/).
